@@ -1,0 +1,6 @@
+requests
+virtualenv
+bottle
+pytest
+nose
+gevent
