@@ -1,6 +1,6 @@
 Installation of Dependencies
 
-sudo apt-get install -y python-dev python-pip apache2-utils 
+sudo apt-get install -y python-dev python-pip apache2-utils libev-dev
 
 sudo pip install -U -r requirements.txt
 
