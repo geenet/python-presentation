@@ -1,6 +1,9 @@
+jinja2
+beaker
 requests
 virtualenv
 bottle
 pytest
 nose
+meinheld
 gevent
