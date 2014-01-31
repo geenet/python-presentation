@@ -7,3 +7,8 @@ pytest
 nose
 meinheld
 gevent
+uwsgi
+bjoern
+eventlet
+fapws
+
