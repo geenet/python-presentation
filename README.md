@@ -22,11 +22,11 @@ http://localhost:8000/<bytes>
 bytes: 10,100,...
 
 # Run Apache Bench
-# ! to avoid too many open files / socket issues - change the default server limits
-# https://cs.uwaterloo.ca/~brecht/servers/openfiles.html
-# ulimit -n 999999
-# sudo su -c 'echo "999999" > /proc/sys/fs/file-max'
-# etc ...
+! to avoid too many open files / socket issues - change the default server limits
+https://cs.uwaterloo.ca/~brecht/servers/openfiles.html
+ulimit -n 999999
+sudo su -c 'echo "999999" > /proc/sys/fs/file-max'
+etc ...
  
 ab -n1000000 -c1000 -r http://localhost:8000/100
  
