@@ -11,7 +11,7 @@ wsgi servers: gunicorn,gevent,uwsgi,meinheld,....
 import re
 re_flags=re.IGNORECASE|re.MULTILINE|re.DOTALL|re.UNICODE
 from gevent import monkey
-monkey.patch_all(thread=False, select=False)
+monkey.patch_all()
 from gevent.pywsgi import WSGIServer
 from bottle import Bottle, run, request, response, HTTPResponse
 import json, time, datetime
