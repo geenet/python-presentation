@@ -4,7 +4,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 # <-- UTF-8 universal workaround done
 default_host='0.0.0.0'
-default_port=8080
+default_port=8010
 """
 wsgi servers: gunicorn,gevent,uwsgi,meinheld,....
 """
@@ -37,7 +37,8 @@ def main():
 def proxy(url_path=None):
 
     domain = request.headers.get('domain')
-    if not domain or ('ilovevideo.tv' not in domain and 'zaporwatch.it' not in domain):
+    if not domain or ('ilovevideo.tv' not in domain and 'zaporwatch.it' not in domain
+                      and 'skiporlike.it' not in domain):
         domain = request.GET.get('domain') or 'de.ilovevideo.tv'
 
     url_path = '/' + (url_path or '')
@@ -114,15 +115,20 @@ def requests_rest_auth(domain, url_path=None, method='GET', data=None, user=None
 
 def copy_request_headers(domain):
     headers = {}
+    H = 'IP,Host,Connection,Cache-Control,Accept,Accept-Encoding,Accept-Language,Cookie,Referer,User-Agent'
     for k, v in dict(request.headers).iteritems():
-        if k in ['Host','Connection','Cache-Control','Accept',
-                 'Accept-Encoding','Accept-Language','Cookie',
-                 'Referer','User-Agent']:
+        if k in H:
+            headers[k]=v
+        else:
+            for prefix in ['X','GEO']: # X- headers, GEO header
+                if k.upper().startswith(prefix):
+                    headers[k]=v
+                    break
             headers[k]=v
     # special for ilovevideo.tv
     from urlparse import urlparse
     #domain = urlparse(url).netloc
-    headers.update(  {#"X-Proxy-Server": "pypxy",
+    headers.update(  {"X-Proxy-Server": "pypxy",
                       "Host": domain} )
     return headers
 
@@ -168,17 +174,17 @@ def check_response(url, page_path, content, status_code):
 
         # navigation bar must always exist
         if page_type in ["video","index"] and 'class="castaclip-category' not in content:
-            error_message(500,'missing_category_navigation'%content_length)
+            error_message(503,'missing_category_navigation'%content_length)
 
         # video/article page must contain the following data
         if page_type in "video":
             if not('window.firstClip = {"id":' in content and 'class="pull-right">' not in content):
-                error_message(500,'missing_incorrect_data')
+                error_message(503,'missing_incorrect_data')
 
         # index page must contain the following data
         if page_type in "index":
             if not('class="pull-right">' in content and 'window.firstClip' not in content):
-                error_message(500,'missing_incorrect_data')
+                error_message(503,'missing_incorrect_data')
 
     return content
 
@@ -195,12 +201,12 @@ def is_header_hoppish(header_name):
 
 def error_message(code, message):
     import  bottle
-    raise bottle.HTTPError(500, "Something went wrong. %s - %s"%(code,message))
+    raise bottle.HTTPError(code, "Something went wrong. %s - %s"%(code,message))
 
 def check_min_length(current_length, min_length):
     if current_length < min_length:
-       message = "Something went wrong. content_too_short_%s - %s"%(str(min_length),str(current_length))
-       error_message(500, message)
+       message = "content_too_short_%s - %s"%(str(min_length),str(current_length))
+       error_message(503, message)
 
 def get_request_headers_():
     h =  {}
