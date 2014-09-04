@@ -6,7 +6,8 @@ sys.setdefaultencoding("utf-8")
 default_host='0.0.0.0'
 default_port= 8010
 ip_destination = '10.0.79.9:9002'
-#ip_destination = 'de.ilovevideo.tv'
+ip_destination = 'de.ilovevideo.tv'
+ip_destination = 'de.skiporlike.it'
 page_destination = 'de.ilovevideo.tv'
 
 """
@@ -40,11 +41,11 @@ def main():
 @app.route("/<url_path:re:.+>")
 def proxy(url_path=None):
 
-    domain = request.headers.get('domain')
+    domain = request.headers.get('host') or request.headers.get('domain')
     if not domain or (    'ilovevideo.tv' not in domain
                       and 'zaporwatch.it' not in domain
                       and 'skiporlike.it' not in domain):
-        domain = request.GET.get('domain') or page_destination
+        domain = request.GET.get('host') or  request.GET.get('domain') or page_destination
 
     url_path = '/' + (url_path or '')
     timeout = 3 if not request.fullpath.startswith('/url') else 10
@@ -174,7 +175,7 @@ def check_response(url, page_path, content, status_code):
 
         # detect page type
         page_type ="custom"
-        if re.findall('^/$', page_path, re_flags) or re.findall('^/[a-z]+$', page_path, re_flags):
+        if re.findall('^/$', page_path, re_flags) or re.findall('^/[a-z/]+$', page_path, re_flags):
             page_type ="index"
         elif not re.findall('^/cpages', page_path, re_flags):
             #elif re.findall('^/.*?\-\d+\-\d+$', page_path, re_flags):
@@ -182,7 +183,7 @@ def check_response(url, page_path, content, status_code):
 
         # navigation bar must always exist
         if page_type in ["video","index"] and 'class="castaclip-category' not in content:
-            error_message(503,'missing_category_navigation'%content_length)
+            error_message(503,'missing_category_navigation')
 
         # video/article page must contain the following data
         if page_type in "video":
