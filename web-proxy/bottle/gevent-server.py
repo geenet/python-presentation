@@ -3,14 +3,13 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 # <-- UTF-8 universal workaround done
-default_host='0.0.0.0'
-default_port= 8000
-
 from gevent import monkey
 monkey.patch_all()
-from gevent.pywsgi import WSGIServer
 from bottle import Bottle, request
 import json, datetime
+
+default_host='0.0.0.0'
+default_port= 8000
 
 app = Bottle()
 
@@ -32,13 +31,19 @@ headers:%s
 </pre>"""%(url_path, server_time, h)
 
 def main():
+
+    # read host and port
     import optparse
     parser = optparse.OptionParser(conflict_handler="resolve",usage='%prog --port=PORT --host=HOST')
     parser.add_option('-p', '--port', default=default_port, dest='port', type='int', help='Port to serve on (default %s)'%default_port)
     parser.add_option('-h', '--host', default=default_host, dest='host', type='str', help='Host for the application (default %s)'%default_host)
     options, args = parser.parse_args()
     host, port = options.host, options.port
+
+    # start server using gevent
     print "Server started at %s:%s"%(host,port)
+
+    from gevent.pywsgi import WSGIServer
     WSGIServer((host, port), app).serve_forever()
 
 if __name__ == "__main__":
